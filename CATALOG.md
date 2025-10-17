@@ -1,5 +1,5 @@
 # Providers Catalog
-> **Stats**: 10 providers, 197 actions.
+> **Stats**: 10 providers, 204 actions.
 
 This document is the single source of truth for every provider bundled with the Integrations SDK and the actions they expose. Update it whenever a provider or action is added, renamed, or removed.
 
