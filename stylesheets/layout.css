@@ -1,0 +1,21 @@
+#mkdocs-terminal-content table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#mkdocs-terminal-content table td,
+#mkdocs-terminal-content table th {
+  white-space: nowrap;
+}
+
+#terminal-mkdocs-main-content {
+  min-width: 0;
+}
+
+@media only screen and (min-width: 70em) {
+  .terminal-mkdocs-main-grid {
+    grid-template-columns: minmax(12rem, 2.5fr) minmax(0, 14.5fr);
+  }
+}
