@@ -1,4 +1,6 @@
 site_name: Integrations SDK
+repo_name: anishxyz/integrations
+repo_url: https://github.com/anishxyz/integrations
 theme:
   name: terminal
   palette: gruvbox_dark
@@ -8,12 +10,13 @@ nav:
   - Overview: index.md
   - Getting Started: getting-started.md
   - Catalog: provider-catalog.md
+  - GitHub: https://github.com/anishxyz/integrations
   - Core:
       - Container: core/integrations-container.md
       - Providers: core/providers.md
       - Actions: core/actions.md
   - Auth:
-      - Auth Overview: auth/index.md
+      - Overview: auth/index.md
       - Flows: auth/flows.md
       - Sessions: auth/sessions.md
       - Credential Storage: auth/storage.md
