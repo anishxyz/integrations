@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from contextlib import AbstractAsyncContextManager
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Iterator, Mapping, Optional
+
+from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic_settings import SettingsError
 
 from .provider import BaseProvider, ProviderSettings
 from .provider_key import ProviderIdentifier, ProviderKey, provider_key
-from .registry import get_provider
+from .registry import available_providers, get_provider
 
 if TYPE_CHECKING:
     from ..providers import (
@@ -28,9 +30,10 @@ ProviderInstance = BaseProvider[Any]
 ProviderConfig = ProviderInstance | ProviderSettings | Mapping[str, Any]
 
 
-@dataclass(frozen=True)
-class ProviderOverrideConfig:
-    """Container for override configuration options."""
+class ProviderOverrideConfig(BaseModel):
+    """Integrations override configuration options."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     config: ProviderConfig
     merge: bool = True
@@ -46,7 +49,7 @@ def provider_override(
     return ProviderOverrideConfig(config=config, merge=merge)
 
 
-class Container:
+class Integrations:
     """Registry of providers that allows attribute access and overrides."""
 
     asana: "AsanaProvider"
@@ -62,11 +65,15 @@ class Container:
 
     def __init__(
         self,
+        *,
+        auto_configure: bool = True,
         **providers: ProviderConfig,
     ) -> None:
         self._providers: Dict[str, ProviderInstance] = {}
         for name, config in providers.items():
             self._providers[name] = self._instantiate_provider(name, config)
+        if auto_configure:
+            self._auto_configure_missing_providers()
 
     def __getattr__(self, name: str) -> ProviderInstance:
         try:
@@ -102,11 +109,11 @@ class Container:
         *,
         merge: bool | None = None,
         **overrides: ProviderConfig | ProviderOverrideConfig,
-    ) -> AbstractAsyncContextManager["Container"]:
+    ) -> AbstractAsyncContextManager["Integrations"]:
         """Return an async-aware context manager that temporarily overrides providers."""
 
         default_merge = True if merge is None else bool(merge)
-        return _ContainerOverride(self, overrides, default_merge=default_merge)
+        return _IntegrationsOverride(self, overrides, default_merge=default_merge)
 
     def _instantiate_provider(
         self,
@@ -154,13 +161,25 @@ class Container:
 
         return base_settings.model_copy(update=update_data)
 
+    def _auto_configure_missing_providers(self) -> None:
+        for name, provider_cls in available_providers().items():
+            if name in self._providers:
+                continue
 
-class _ContainerOverride(AbstractAsyncContextManager[Container]):
+            try:
+                provider = provider_cls()
+            except (ValidationError, SettingsError):
+                continue
+
+            self._providers[name] = provider
+
+
+class _IntegrationsOverride(AbstractAsyncContextManager[Integrations]):
     """Async-aware context manager that swaps providers while active."""
 
     def __init__(
         self,
-        container: Container,
+        container: Integrations,
         overrides: Dict[str, ProviderConfig | ProviderOverrideConfig],
         *,
         default_merge: bool,
@@ -171,14 +190,14 @@ class _ContainerOverride(AbstractAsyncContextManager[Container]):
         self._previous: Dict[str, ProviderInstance] = {}
         self._missing: set[str] = set()
 
-    async def __aenter__(self) -> Container:
+    async def __aenter__(self) -> Integrations:
         self._apply()
         return self._container
 
     async def __aexit__(self, *_: Any) -> None:
         self._restore()
 
-    def __enter__(self) -> Container:
+    def __enter__(self) -> Integrations:
         self._apply()
         return self._container
 

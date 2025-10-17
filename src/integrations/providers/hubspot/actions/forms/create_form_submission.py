@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Mapping, TYPE_CHECKING
 
-from .....core.actions import BaseAction
+from ..hubspot_base_action import HubspotBaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...hubspot_provider import HubspotProvider
 
 
-class CreateFormSubmission(BaseAction):
+class CreateFormSubmission(HubspotBaseAction):
     """Submit data to a HubSpot form."""
+
+    provider: "HubspotProvider"
 
     async def __call__(
         self,

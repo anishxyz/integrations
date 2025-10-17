@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class CreateOrUpdateFile(BaseAction):
     """Create or update file contents within a repository."""
+
+    provider: "GithubProvider"
 
     async def __call__(
         self,

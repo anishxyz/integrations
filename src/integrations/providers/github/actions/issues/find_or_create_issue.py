@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Any, Iterable, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class FindOrCreateIssue(BaseAction):
     """Find an existing issue by title or create it."""
+
+    provider: "GithubProvider"
 
     async def __call__(
         self,

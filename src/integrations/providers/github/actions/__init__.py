@@ -1,6 +1,15 @@
 """Github provider actions grouped by domain."""
 
 from .branches import CreateBranch, DeleteBranch, FindBranch
+from .codespaces import (
+    CreateCodespace,
+    DeleteCodespace,
+    GetCodespace,
+    ListCodespaces,
+    ListRepositoryCodespaces,
+    StartCodespace,
+    StopCodespace,
+)
 from .files import CreateOrUpdateFile
 from .gists import CreateGist
 from .issues import (
@@ -32,6 +41,7 @@ __all__ = [
     "CheckOrganizationMembership",
     "CreateBranch",
     "CreateComment",
+    "CreateCodespace",
     "CreateGist",
     "CreateIssue",
     "CreateOrUpdateFile",
@@ -39,6 +49,7 @@ __all__ = [
     "CreateRepository",
     "CreateRepositoryFromTemplate",
     "DeleteBranch",
+    "DeleteCodespace",
     "FindBranch",
     "FindIssue",
     "FindOrCreateIssue",
@@ -46,10 +57,15 @@ __all__ = [
     "FindOrganization",
     "FindPullRequest",
     "FindRepository",
+    "GetCodespace",
     "FindUser",
     "GetAuthenticatedUser",
+    "ListCodespaces",
     "ListRepositories",
+    "ListRepositoryCodespaces",
     "SetProfileStatus",
+    "StartCodespace",
+    "StopCodespace",
     "SubmitReview",
     "UpdateIssue",
     "UpdatePullRequest",

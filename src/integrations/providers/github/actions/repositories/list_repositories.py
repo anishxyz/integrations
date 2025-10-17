@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class ListRepositories(BaseAction):
     """List repositories accessible to the authenticated user."""
+
+    provider: "GithubProvider"
 
     async def __call__(
         self,

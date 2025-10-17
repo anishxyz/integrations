@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from integrations.core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...slack_provider import SlackProvider
 
 
 class CreateChannel(BaseAction):
     """Create a Slack channel."""
+
+    provider: "SlackProvider"
 
     async def __call__(
         self,

@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Sequence
+from typing import Any, Mapping, Sequence, TYPE_CHECKING
 
 from integrations.core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...notion_provider import NotionProvider
 
 
 class AddContentToPage(BaseAction):
     """Append blocks to a page or block."""
+
+    provider: "NotionProvider"
 
     async def __call__(
         self,

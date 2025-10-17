@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class CreateGist(BaseAction):
     """Create a gist with the given files."""
+
+    provider: "GithubProvider"
 
     async def __call__(
         self,

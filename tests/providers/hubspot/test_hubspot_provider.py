@@ -7,7 +7,7 @@ from typing import Any, Dict, Tuple
 
 import pytest
 
-from integrations import Container
+from integrations import Integrations
 from integrations.providers.hubspot.hubspot_provider import HubspotProvider
 from integrations.providers.hubspot.hubspot_settings import HubspotSettings
 
@@ -273,7 +273,7 @@ async def test_raw_request_action(
 @pytest.mark.asyncio
 async def test_container_end_to_end(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = HubspotSettings(access_token="token")
-    container = Container(hubspot=settings)
+    container = Integrations(hubspot=settings)
 
     stub_client = StubAsyncClient(
         responses={

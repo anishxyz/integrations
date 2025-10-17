@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class CheckOrganizationMembership(BaseAction):
     """Return membership details when a user belongs to an organization."""
+
+    provider: "GithubProvider"
 
     async def __call__(self, organization: str, username: str) -> Any | None:
         response = await self.provider.request(

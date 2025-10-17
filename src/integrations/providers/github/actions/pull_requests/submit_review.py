@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Dict, Iterable, Mapping, TYPE_CHECKING
 
 from .....core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...github_provider import GithubProvider
 
 
 class SubmitReview(BaseAction):
     """Submit a review for a pull request."""
+
+    provider: "GithubProvider"
 
     async def __call__(
         self,

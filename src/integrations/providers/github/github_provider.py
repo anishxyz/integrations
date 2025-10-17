@@ -7,6 +7,7 @@ from typing import Dict
 
 from ...core import BaseProvider, HttpxClientMixin, RawHttpRequestAction, action
 from .actions import (
+    CreateCodespace,
     AddLabelsToIssue,
     CheckOrganizationMembership,
     CreateBranch,
@@ -17,6 +18,7 @@ from .actions import (
     CreatePullRequest,
     CreateRepository,
     CreateRepositoryFromTemplate,
+    DeleteCodespace,
     DeleteBranch,
     FindBranch,
     FindIssue,
@@ -26,10 +28,15 @@ from .actions import (
     FindPullRequest,
     FindRepository,
     FindUser,
+    GetCodespace,
     GetAuthenticatedUser,
+    ListCodespaces,
     ListRepositories,
+    ListRepositoryCodespaces,
     SetProfileStatus,
+    StartCodespace,
     SubmitReview,
+    StopCodespace,
     UpdateIssue,
     UpdatePullRequest,
 )
@@ -50,6 +57,15 @@ class GithubProvider(HttpxClientMixin, BaseProvider[GithubSettings]):
     delete_branch: DeleteBranch
     find_branch: FindBranch
     create_or_update_file: CreateOrUpdateFile
+
+    # Codespaces actions
+    list_codespaces: ListCodespaces
+    list_repository_codespaces: ListRepositoryCodespaces
+    create_codespace: CreateCodespace
+    get_codespace: GetCodespace
+    delete_codespace: DeleteCodespace
+    start_codespace: StartCodespace
+    stop_codespace: StopCodespace
 
     # Issue actions
     create_issue: CreateIssue
@@ -108,6 +124,34 @@ class GithubProvider(HttpxClientMixin, BaseProvider[GithubSettings]):
     create_or_update_file = action(
         CreateOrUpdateFile,
         description="Create or update a file within a repository.",
+    )
+    list_codespaces = action(
+        ListCodespaces,
+        description="List the authenticated user's codespaces.",
+    )
+    list_repository_codespaces = action(
+        ListRepositoryCodespaces,
+        description="List codespaces for a repository accessible to the user.",
+    )
+    create_codespace = action(
+        CreateCodespace,
+        description="Create a codespace for the authenticated user in a repository.",
+    )
+    get_codespace = action(
+        GetCodespace,
+        description="Fetch details about a specific codespace.",
+    )
+    delete_codespace = action(
+        DeleteCodespace,
+        description="Delete a codespace owned by the authenticated user.",
+    )
+    start_codespace = action(
+        StartCodespace,
+        description="Start a codespace owned by the authenticated user.",
+    )
+    stop_codespace = action(
+        StopCodespace,
+        description="Stop a codespace owned by the authenticated user.",
     )
     create_issue = action(
         CreateIssue,

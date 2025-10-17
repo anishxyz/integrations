@@ -4,7 +4,13 @@ from pathlib import Path
 from agents import Agent, Runner
 from dotenv import load_dotenv
 
-from integrations import BaseAction, BaseProvider, Container, ProviderSettings, action
+from integrations import (
+    BaseAction,
+    BaseProvider,
+    Integrations,
+    ProviderSettings,
+    action,
+)
 
 
 def _load_env_file(filename: str = ".env") -> None:
@@ -45,11 +51,11 @@ class WeatherProvider(BaseProvider[WeatherSettings]):
     )
 
 
-container = Container(
+integrations = Integrations(
     weather=WeatherProvider(WeatherSettings(default_conditions="sunny"))
 )
 
-weather_tool = container.weather.forecast.as_tool(name="get_weather")
+weather_tool = integrations.weather.forecast.as_tool(name="get_weather")
 
 agent = Agent(
     name="Hello world",

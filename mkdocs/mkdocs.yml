@@ -1,0 +1,39 @@
+site_name: Integrations SDK
+theme:
+  name: terminal
+  palette: gruvbox_dark
+extra_css:
+  - stylesheets/layout.css
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+  - Catalog: provider-catalog.md
+  - Core:
+      - Container: core/integrations-container.md
+      - Providers: core/providers.md
+      - Actions: core/actions.md
+  - Auth:
+      - Auth Overview: auth/index.md
+      - Flows: auth/flows.md
+      - Sessions: auth/sessions.md
+      - Credential Storage: auth/storage.md
+  - Providers:
+      - Asana: providers/asana.md
+      - GitHub: providers/github.md
+      - Gmail: providers/gmail.md
+      - Google Calendar: providers/google-calendar.md
+      - Google Docs: providers/google-docs.md
+      - Google Drive: providers/google-drive.md
+      - Google Sheets: providers/google-sheets.md
+      - HubSpot: providers/hubspot.md
+      - Notion: providers/notion.md
+      - Slack: providers/slack.md
+  - Auth Providers:
+      - Asana Auth: auth-providers/asana_auth.md
+      - GitHub Auth: auth-providers/github_auth.md
+      - Google Auth: auth-providers/google_auth.md
+      - HubSpot Auth: auth-providers/hubspot_auth.md
+      - Notion Auth: auth-providers/notion_auth.md
+      - Slack Auth: auth-providers/slack_auth.md
+  - Extras:
+      - OpenAI Agents: extras/openai-agents.md

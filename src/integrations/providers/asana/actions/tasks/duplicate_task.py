@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Any, Iterable, TYPE_CHECKING
 
 from integrations.core import BaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...asana_provider import AsanaProvider
 
 
 class DuplicateTask(BaseAction):
     """Duplicate an Asana task."""
+
+    provider: "AsanaProvider"
 
     async def __call__(
         self,

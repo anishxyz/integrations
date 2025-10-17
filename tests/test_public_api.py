@@ -7,7 +7,7 @@ def test_root_level_exports() -> None:
     import integrations
     import integrations.core as core
 
-    assert integrations.Container is core.Container
+    assert integrations.Integrations is core.Integrations
     assert integrations.BaseProvider is core.BaseProvider
     assert integrations.ProviderSettings is core.ProviderSettings
     assert integrations.BaseAction is core.BaseAction

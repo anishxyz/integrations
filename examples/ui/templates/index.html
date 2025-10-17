@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Integrations UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font-family: ui-monospace, "SFMono-Regular", "SFMono", "SF Mono", ".SFNSMono", monospace;
+        font-weight: 400;
+        font-size: 14px;
+        background: #fff;
+        color: #000;
+        margin: 0;
+        padding: 32px 48px;
+        display: flex;
+        justify-content: center;
+        transition: background 0.3s ease, color 0.3s ease;
+      }
+      body.dark {
+        background: #000;
+        color: #fff;
+      }
+      main {
+        width: min(840px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+      }
+      h2 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+        text-decoration-color: currentColor;
+      }
+      h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 2px 0 2px 0;
+      }
+      p {
+        margin: 0 0 12px 0;
+        line-height: 1.4;
+      }
+      .form-section h3 + p {
+        margin-top: 4px;
+        margin-bottom: 20px;
+      }
+      ul {
+        margin: 0;
+        padding-left: 24px;
+        columns: 2;
+        column-gap: 40px;
+      }
+      li {
+        line-height: 1.35;
+        break-inside: avoid;
+        margin-bottom: 4px;
+      }
+      .provider-item {
+        border: none;
+        background: none;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        font-weight: 400;
+        cursor: pointer;
+        color: inherit;
+      }
+      .provider-item:hover,
+      .provider-item:focus {
+        color: #1ab8ff;
+        outline: none;
+      }
+      .provider-item.active {
+        color: #1ab8ff;
+      }
+      code {
+        font-family: inherit;
+        font-weight: 400;
+        font-size: 14px;
+      }
+      .shortcut-hint {
+        font-size: 12px;
+        color: #6b7280;
+      }
+      body.dark .shortcut-hint {
+        color: #9ca3af;
+      }
+      #provider-detail {
+        display: none;
+        min-height: 160px;
+        border: 1px solid #000;
+        padding: 16px;
+        margin-top: 24px;
+        box-sizing: border-box;
+      }
+      body.dark #provider-detail {
+        border-color: #fff;
+      }
+      .tab-bar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .tab-button {
+        border: none;
+        background: transparent;
+        font: inherit;
+        font-weight: 400;
+        padding: 4px 6px;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+      }
+      .tab-button[data-variant="green"] {
+        color: #27b648;
+      }
+      .tab-button[data-variant="green"]:hover,
+      .tab-button[data-variant="green"]:focus {
+        background: rgba(39, 182, 72, 0.12);
+        color: #27b648;
+        outline: none;
+      }
+      .tab-button[data-variant="green"].active {
+        background: #27b648;
+        color: #000;
+      }
+      .tab-button[data-variant="orange"] {
+        color: #ff7a1a;
+      }
+      .tab-button[data-variant="orange"]:hover,
+      .tab-button[data-variant="orange"]:focus {
+        background: rgba(255, 122, 26, 0.12);
+        color: #ff7a1a;
+        outline: none;
+      }
+      .tab-button[data-variant="orange"].active {
+        background: #ff7a1a;
+        color: #000;
+      }
+      .tab-separator {
+        color: currentColor;
+        opacity: 0.4;
+        padding: 0 6px;
+      }
+      .tab-content {
+        min-height: 100px;
+        box-sizing: border-box;
+      }
+      .form-section {
+        margin: 0 0 16px 0;
+      }
+      .form-section p {
+        color: #6b7280;
+        margin: 8px 0 14px;
+      }
+      body.dark .form-section p {
+        color: #94a3b8;
+      }
+      .form-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      label {
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: 1px solid rgba(15, 23, 42, 0.25);
+        background: transparent;
+        color: inherit;
+        padding: 6px 8px;
+        font: inherit;
+        border-radius: 2px;
+        box-sizing: border-box;
+      }
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+      }
+      body.dark input,
+      body.dark textarea {
+        border-color: rgba(226, 232, 240, 0.25);
+      }
+      .placeholder {
+        color: #94a3b8;
+      }
+      .actions-grid {
+        list-style: none;
+        margin: 16px 0 0 0;
+        padding: 0;
+        columns: 2;
+        column-gap: 28px;
+      }
+      .actions-grid li {
+        position: relative;
+        padding-left: 16px;
+        margin-bottom: 6px;
+        break-inside: avoid;
+      }
+      .actions-grid li::before {
+        content: "*";
+        position: absolute;
+        left: 0;
+        color: inherit;
+      }
+      .actions-grid li.hidden {
+        display: none !important;
+      }
+      .actions-grid li.placeholder {
+        text-align: center;
+        padding: 8px 0;
+        margin: 0;
+      }
+      .actions-grid li.placeholder::before {
+        display: none;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .flow-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      .flow-option {
+        border: none;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-weight: 500;
+        text-align: left;
+        padding: 2px 0;
+        cursor: pointer;
+      }
+      .flow-option::before {
+        content: ">";
+        display: inline-block;
+        margin-right: 6px;
+        color: currentColor;
+      }
+      .flow-option:hover,
+      .flow-option:focus {
+        color: #1ab8ff;
+        outline: none;
+      }
+      .flow-option.active {
+        color: #1ab8ff;
+      }
+      .flow-detail {
+        border-top: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 16px 0;
+      }
+      .flow-detail .form-section:first-child h3 {
+        margin-top: 0;
+      }
+      .flow-detail .form-section:last-child {
+        margin-bottom: 0;
+      }
+      .tab-content > .form-section:first-child h3 {
+        margin-top: -4px;
+      }
+      .tab-content > .form-section:first-child {
+        margin-top: 0;
+      }
+      .tab-content > .form-section:first-child p {
+        margin-top: 4px;
+      }
+      body.dark .flow-detail {
+        border-color: rgba(226, 232, 240, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Integrations UI Playground</h1>
+        <p class="shortcut-hint">Press <code>d</code> to toggle dark mode.</p>
+      </header>
+      <section>
+        <h2>Available Integrations</h2>
+        {% if providers %}
+        <ul id="provider-list">
+          {% for provider in providers %}
+          <li>
+            <button class="provider-item" data-provider="{{ provider }}">
+              <code>{{ provider }}</code>
+            </button>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>No providers registered.</p>
+        {% endif %}
+        <div id="provider-detail">
+          <nav class="tab-bar" aria-label="Provider tabs">
+            <button class="tab-button active" data-tab="setup" data-variant="green">Setup</button>
+            <span class="tab-separator" aria-hidden="true">|</span>
+            <button class="tab-button" data-tab="test" data-variant="orange">Test</button>
+          </nav>
+          <div class="tab-content" id="tab-content"></div>
+        </div>
+      </section>
+    </main>
+    <script>
+      const PROVIDER_ACTIONS = {{ provider_actions | tojson }};
+      (function () {
+        const storageKey = 'integrations-ui-theme';
+        const body = document.body;
+        const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
+        const tabContent = document.getElementById('tab-content');
+        let currentProvider = null;
+        let activeTab = 'setup';
+
+        const githubFlows = [
+          { key: 'pat', title: 'Personal Access Token' },
+          { key: 'oauth', title: 'OAuth App' },
+          { key: 'app', title: 'GitHub App' },
+        ];
+
+        const providerRenderers = {
+          github: {
+            setup: renderGithubSetup,
+            test: renderProviderTest,
+          },
+        };
+
+        const tabInitializers = {
+          github: {
+            setup: initGithubSetupFlow,
+            test: initProviderTestFlow,
+          },
+        };
+
+        function applyTheme(theme) {
+          if (theme === 'dark') {
+            body.classList.add('dark');
+          } else {
+            body.classList.remove('dark');
+          }
+        }
+
+        function initTheme() {
+          const stored = window.localStorage.getItem(storageKey);
+          if (stored) {
+            applyTheme(stored);
+          } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+          }
+        }
+
+        function initThemeShortcut() {
+          window.addEventListener('keydown', (event) => {
+            const target = event.target;
+            if (
+              event.altKey ||
+              event.ctrlKey ||
+              event.metaKey ||
+              target instanceof HTMLInputElement ||
+              target instanceof HTMLTextAreaElement ||
+              target instanceof HTMLSelectElement ||
+              (target && target.isContentEditable)
+            ) {
+              return;
+            }
+
+            if (event.key.toLowerCase() === 'd') {
+              const nextTheme = body.classList.contains('dark') ? 'light' : 'dark';
+              applyTheme(nextTheme);
+              window.localStorage.setItem(storageKey, nextTheme);
+            }
+          });
+        }
+
+        function activateTab(tabName) {
+          activeTab = tabName;
+          tabButtons.forEach((button) => {
+            const isActive = button.dataset.tab === tabName;
+            button.classList.toggle('active', isActive);
+          });
+          renderTabContent();
+        }
+
+        function renderTabContent() {
+          if (!tabContent) {
+            return;
+          }
+
+          tabContent.innerHTML = '';
+
+          if (!currentProvider) {
+            tabContent.innerHTML = '<p class="placeholder">Select a provider to view setup details.</p>';
+            return;
+          }
+
+          const renderer = providerRenderers[currentProvider]?.[activeTab];
+          if (renderer) {
+            tabContent.innerHTML = renderer(currentProvider);
+            const initializer = tabInitializers[currentProvider]?.[activeTab];
+            if (initializer) {
+              initializer(currentProvider);
+            }
+          } else {
+            tabContent.innerHTML = `<p class="placeholder">No ${activeTab} view defined for ${currentProvider} yet.</p>`;
+          }
+        }
+
+        function initTabs() {
+          tabButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+              activateTab(button.dataset.tab || '');
+            });
+          });
+        }
+
+        function initProviderSelection() {
+          const detail = document.getElementById('provider-detail');
+          const providerButtons = Array.from(
+            document.querySelectorAll('.provider-item')
+          );
+
+          providerButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+              providerButtons.forEach((btn) => btn.classList.remove('active'));
+              button.classList.add('active');
+              currentProvider = button.dataset.provider || null;
+              detail.style.display = 'block';
+              activateTab('setup');
+            });
+          });
+        }
+
+        function renderGithubSetup() {
+          const options = githubFlows
+            .map(
+              (flow, index) => `
+                <button
+                  class="flow-option${index === 0 ? ' active' : ''}"
+                  type="button"
+                  data-flow="${flow.key}"
+                  tabindex="0"
+                >
+                  ${flow.title}
+                </button>
+              `
+            )
+            .join('');
+
+          return `
+            <div id="github-setup">
+              <div class="form-section">
+                <h3>Setup flows</h3>
+                <p>Select the authentication flow you want to configure.</p>
+              </div>
+              <div class="flow-picker" role="listbox" tabindex="0">
+                ${options}
+              </div>
+              <div class="flow-detail"></div>
+            </div>
+          `;
+        }
+
+        function renderProviderTest(providerKey) {
+          const actions = PROVIDER_ACTIONS[providerKey] || [];
+          const hasActions = actions.length > 0;
+          const actionItems = actions
+            .map(
+              (name) =>
+                `<li data-action-name="${name}"><code>${name}</code></li>`
+            )
+            .join('');
+          const emptyText = hasActions
+            ? 'No matching actions.'
+            : 'No actions registered for this provider yet.';
+          return `
+            <div data-test-panel data-has-actions="${hasActions}">
+              <div class="form-section">
+                <h3>Available actions</h3>
+                <p>Search registered actions to validate your auth configuration.</p>
+                <div class="form-stack">
+                  <label>
+                    Filter actions
+                    <input type="text" data-test-search placeholder="Start typing to filter actions..." ${hasActions ? '' : 'disabled'} />
+                  </label>
+                </div>
+              </div>
+              <ul class="actions-grid" data-test-actions>
+                ${hasActions ? actionItems : ''}
+                <li class="placeholder${hasActions ? ' hidden' : ''}" data-test-empty>${emptyText}</li>
+              </ul>
+            </div>
+          `;
+        }
+
+        function initGithubSetupFlow() {
+          const setupRoot = tabContent.querySelector('#github-setup');
+          if (!setupRoot) {
+            return;
+          }
+          const picker = setupRoot.querySelector('.flow-picker');
+          const options = Array.from(setupRoot.querySelectorAll('.flow-option'));
+          const detail = setupRoot.querySelector('.flow-detail');
+
+          if (!options.length || !detail) {
+            return;
+          }
+
+          let activeIndex = options.findIndex((btn) => btn.classList.contains('active'));
+          if (activeIndex === -1) {
+            activeIndex = 0;
+            options[0].classList.add('active');
+          }
+
+          function renderFlow(key) {
+            switch (key) {
+              case 'pat':
+                return renderGithubPatFlow();
+              case 'oauth':
+                return renderGithubOAuthFlow();
+              case 'app':
+                return renderGithubAppFlow();
+              default:
+                return '<p class="placeholder">No details for this flow yet.</p>';
+            }
+          }
+
+          function select(index) {
+            if (index < 0) {
+              index = options.length - 1;
+            } else if (index >= options.length) {
+              index = 0;
+            }
+            options.forEach((btn) => btn.classList.remove('active'));
+            const button = options[index];
+            button.classList.add('active');
+            detail.innerHTML = renderFlow(button.dataset.flow || '');
+            activeIndex = index;
+            button.focus();
+          }
+
+          options.forEach((button, index) => {
+            button.addEventListener('click', () => {
+              select(index);
+            });
+          });
+
+          picker.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              select(activeIndex + 1);
+            } else if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              select(activeIndex - 1);
+            }
+          });
+
+          select(activeIndex);
+        }
+
+        function initProviderTestFlow(providerKey) {
+          const panel = tabContent.querySelector('[data-test-panel]');
+          if (!panel) {
+            return;
+          }
+          const hasActions = panel.dataset.hasActions === 'true';
+          const searchInput = panel.querySelector('[data-test-search]');
+          const list = panel.querySelector('[data-test-actions]');
+          const emptyMessage = list?.querySelector('[data-test-empty]') || null;
+          if (!hasActions) {
+            if (searchInput) {
+              searchInput.setAttribute('disabled', 'disabled');
+            }
+            return;
+          }
+          if (!list || !searchInput) {
+            return;
+          }
+          const items = Array.from(list.querySelectorAll('li[data-action-name]'));
+
+          function applyFilter(query) {
+            const needle = query.trim().toLowerCase();
+            let visibleCount = 0;
+            items.forEach((item) => {
+              const name = (item.dataset.actionName || '').toLowerCase();
+              const match = !needle || name.includes(needle);
+              item.classList.toggle('hidden', !match);
+              if (match) {
+                visibleCount += 1;
+              }
+            });
+            if (emptyMessage) {
+              emptyMessage.classList.toggle('hidden', visibleCount > 0);
+            }
+          }
+
+          searchInput.addEventListener('input', () => {
+            applyFilter(searchInput.value || '');
+          });
+
+          applyFilter('');
+        }
+
+        function renderGithubPatFlow() {
+          return `
+            <div class="form-section">
+              <h3>Personal Access Token</h3>
+              <p>Use a classic PAT or fine-grained token with the scopes your workflows require.</p>
+              <div class="form-stack">
+                <label>
+                  Token
+                  <input type="text" name="github_token" placeholder="ghp_..." autocomplete="off" />
+                </label>
+                <label>
+                  Authorization scheme
+                  <input type="text" name="github_scheme" value="Bearer" />
+                </label>
+              </div>
+            </div>
+          `;
+        }
+
+        function renderGithubOAuthFlow() {
+          return `
+            <div class="form-section">
+              <h3>OAuth App</h3>
+              <p>Register a GitHub OAuth application for user sign-in flows and paste the credentials here.</p>
+              <div class="form-stack">
+                <label>
+                  Client ID
+                  <input type="text" name="github_oauth_client_id" placeholder="Iv1..." />
+                </label>
+                <label>
+                  Client secret
+                  <input type="password" name="github_oauth_client_secret" placeholder="••••••" />
+                </label>
+                <label>
+                  Redirect URI
+                  <input type="url" name="github_oauth_redirect_uri" placeholder="https://example.com/oauth/github/callback" />
+                </label>
+                <label>
+                  Scopes (comma separated)
+                  <input type="text" name="github_oauth_scopes" placeholder="repo, user" />
+                </label>
+              </div>
+            </div>
+          `;
+        }
+
+        function renderGithubAppFlow() {
+          return `
+            <div class="form-section">
+              <h3>GitHub App</h3>
+              <p>Configure credentials for a GitHub App installation, including the PEM private key.</p>
+              <div class="form-stack">
+                <label>
+                  App ID
+                  <input type="text" name="github_app_id" placeholder="123456" />
+                </label>
+                <label>
+                  Installation ID
+                  <input type="text" name="github_installation_id" placeholder="987654321" />
+                </label>
+                <label>
+                  Client ID
+                  <input type="text" name="github_app_client_id" placeholder="Iv1..." />
+                </label>
+                <label>
+                  Client secret
+                  <input type="password" name="github_app_client_secret" placeholder="••••••" />
+                </label>
+                <label>
+                  Webhook secret
+                  <input type="password" name="github_webhook_secret" placeholder="Optional" />
+                </label>
+                <label>
+                  Private key (PEM)
+                  <textarea name="github_private_key" placeholder="-----BEGIN PRIVATE KEY-----"></textarea>
+                </label>
+              </div>
+            </div>
+          `;
+        }
+
+        initTheme();
+        initThemeShortcut();
+        initTabs();
+        initProviderSelection();
+        renderTabContent();
+      })();
+    </script>
+  </body>
+</html>

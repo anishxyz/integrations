@@ -13,7 +13,7 @@ from agents.tool_context import ToolContext
 from integrations import (
     BaseAction,
     BaseProvider,
-    Container,
+    Integrations,
     ProviderSettings,
     action,
 )
@@ -22,7 +22,7 @@ from integrations.providers.github.github_settings import GithubSettings
 
 @pytest.mark.asyncio
 async def test_actions_convert_to_openai_tools(monkeypatch: pytest.MonkeyPatch) -> None:
-    container = Container(github=GithubSettings(token="token", user_agent="ua"))
+    container = Integrations(github=GithubSettings(token="token", user_agent="ua"))
 
     payload = [{"name": "repo"}]
     responses = {

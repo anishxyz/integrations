@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from .....core.actions import BaseAction
+from ..hubspot_base_action import HubspotBaseAction
+
+if TYPE_CHECKING:  # pragma: no cover - avoids runtime import cycle
+    from ...hubspot_provider import HubspotProvider
 
 
-class GetOwnerById(BaseAction):
+class GetOwnerById(HubspotBaseAction):
     """Retrieve an owner by ID."""
+
+    provider: "HubspotProvider"
 
     async def __call__(self, owner_id: str) -> Any:
         response = await self.provider.request(

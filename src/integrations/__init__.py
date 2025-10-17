@@ -3,7 +3,7 @@
 from .core import (
     BaseAction,
     BaseProvider,
-    Container,
+    Integrations,
     HttpxClientMixin,
     ProviderIdentifier,
     ProviderKey,
@@ -17,7 +17,7 @@ from .core import (
 )
 
 __all__ = [
-    "Container",
+    "Integrations",
     "BaseProvider",
     "ProviderSettings",
     "BaseAction",

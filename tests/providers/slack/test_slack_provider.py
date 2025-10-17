@@ -7,7 +7,7 @@ from typing import Any, Dict, Mapping, Tuple
 import httpx
 import pytest
 
-from integrations import Container
+from integrations import Integrations
 from integrations.providers.slack.slack_provider import SlackProvider
 from integrations.providers.slack.slack_settings import SlackSettings
 
@@ -342,9 +342,9 @@ async def test_find_conversation_members(
 
 
 @pytest.mark.asyncio
-async def test_container_end_to_end(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_integrations_end_to_end(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = SlackSettings(token="xoxb-override", user_agent="sdk")
-    container = Container(slack=settings)
+    container = Integrations(slack=settings)
 
     responses = {
         ("POST", "/chat.postMessage"): [StubResponse({"ok": True, "ts": "1.0"})],

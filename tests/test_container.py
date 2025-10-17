@@ -1,4 +1,4 @@
-"""Tests for the Container class covering common usage flows."""
+"""Tests for the Integrations class covering common usage flows."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pytest
 from integrations import (
     BaseAction,
     BaseProvider,
-    Container,
+    Integrations,
     ProviderSettings,
     action,
     register_provider,
@@ -38,12 +38,12 @@ register_provider("dummy", DummyProvider)
 
 
 @pytest.fixture
-def container() -> Container:
-    return Container(dummy=DummySettings(name="default-dummy", nickname="base"))
+def container() -> Integrations:
+    return Integrations(dummy=DummySettings(name="default-dummy", nickname="base"))
 
 
 @pytest.mark.asyncio
-async def test_container_provides_attribute_access(container: Container) -> None:
+async def test_container_provides_attribute_access(container: Integrations) -> None:
     dummy = container.dummy
     assert isinstance(dummy, DummyProvider)
     assert dummy.settings.nickname == "base"
@@ -51,7 +51,7 @@ async def test_container_provides_attribute_access(container: Container) -> None
 
 
 def test_container_accepts_mapping_configuration() -> None:
-    container = Container(dummy={"name": "mapped", "nickname": "map"})
+    container = Integrations(dummy={"name": "mapped", "nickname": "map"})
     assert container.dummy.settings.nickname == "map"
 
 
@@ -59,7 +59,7 @@ def test_container_falls_back_to_environment(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv("DUMMY_NAME", "env-dummy")
     monkeypatch.setenv("DUMMY_NICKNAME", "env-nick")
 
-    container = Container(dummy={})
+    container = Integrations(dummy={})
 
     assert container.dummy.settings.name == "env-dummy"
     assert container.dummy.settings.nickname == "env-nick"
@@ -70,7 +70,7 @@ def test_environment_defaults_yield_to_explicit_values(
 ) -> None:
     monkeypatch.setenv("DUMMY_NAME", "env-dummy")
 
-    container = Container(dummy={"name": "explicit"})
+    container = Integrations(dummy={"name": "explicit"})
 
     assert container.dummy.settings.name == "explicit"
 
@@ -78,14 +78,38 @@ def test_environment_defaults_yield_to_explicit_values(
 def test_environment_and_manual_values_can_mix(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DUMMY_NICKNAME", "env-nick")
 
-    container = Container(dummy={"name": "manual"})
+    container = Integrations(dummy={"name": "manual"})
 
     assert container.dummy.settings.name == "manual"
     assert container.dummy.settings.nickname == "env-nick"
 
 
+def test_container_autoconfigures_from_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("DUMMY_NAME", "auto-dummy")
+    monkeypatch.setenv("DUMMY_NICKNAME", "auto-nick")
+
+    container = Integrations()
+
+    assert container.dummy.settings.name == "auto-dummy"
+    assert container.dummy.settings.nickname == "auto-nick"
+
+
+def test_container_auto_configure_can_be_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DUMMY_NAME", raising=False)
+    monkeypatch.delenv("DUMMY_NICKNAME", raising=False)
+
+    container = Integrations(auto_configure=False)
+
+    with pytest.raises(AttributeError):
+        _ = container.dummy
+
+
 @pytest.mark.asyncio
-async def test_container_override_sync_context(container: Container) -> None:
+async def test_container_override_sync_context(container: Integrations) -> None:
     with container.overrides(dummy={"name": "override"}):
         dummy = container.dummy
         assert await dummy.ident() == "override"
@@ -95,7 +119,7 @@ async def test_container_override_sync_context(container: Container) -> None:
 
 
 @pytest.mark.asyncio
-async def test_container_override_async_context(container: Container) -> None:
+async def test_container_override_async_context(container: Integrations) -> None:
     async with container.overrides(dummy={"name": "async-override"}):
         dummy = container.dummy
         assert await dummy.ident() == "async-override"
@@ -105,7 +129,7 @@ async def test_container_override_async_context(container: Container) -> None:
 
 
 @pytest.mark.asyncio
-async def test_container_override_replacement(container: Container) -> None:
+async def test_container_override_replacement(container: Integrations) -> None:
     with container.overrides(merge=False, dummy={"name": "replacement"}):
         dummy = container.dummy
         assert await dummy.ident() == "replacement"

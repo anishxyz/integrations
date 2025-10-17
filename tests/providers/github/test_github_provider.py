@@ -7,7 +7,7 @@ from typing import Any, Dict, Mapping, Tuple
 
 import pytest
 
-from integrations import Container
+from integrations import Integrations
 from integrations.providers.github.github_provider import GithubProvider
 from integrations.providers.github.github_settings import GithubSettings
 
@@ -223,6 +223,57 @@ async def test_list_repositories_uses_client_and_returns_payload(
 
 
 @pytest.mark.asyncio
+async def test_list_codespaces(
+    monkeypatch: pytest.MonkeyPatch, settings: GithubSettings
+) -> None:
+    provider = GithubProvider(settings=settings)
+    payload = {"total_count": 1, "codespaces": []}
+    responses = {
+        ("GET", "/user/codespaces", (("per_page", 30),)): StubResponse(payload),
+    }
+    calls: list[dict] = []
+
+    def fake_client(**_):
+        return StubAsyncClient(responses=responses, calls=calls)
+
+    monkeypatch.setattr(provider, "httpx_client", fake_client)
+
+    result = await provider.list_codespaces(per_page=30)
+
+    assert result == payload
+    assert calls[0]["path"] == "/user/codespaces"
+    assert calls[0]["params"] == {"per_page": 30}
+
+
+@pytest.mark.asyncio
+async def test_list_repository_codespaces(
+    monkeypatch: pytest.MonkeyPatch,
+    settings: GithubSettings,
+) -> None:
+    provider = GithubProvider(settings=settings)
+    payload = {"total_count": 2, "codespaces": [{"name": "one"}, {"name": "two"}]}
+    responses = {
+        (
+            "GET",
+            "/repos/octo/proj/codespaces",
+            (("page", 2),),
+        ): StubResponse(payload),
+    }
+    calls: list[dict] = []
+
+    def fake_client(**_):
+        return StubAsyncClient(responses=responses, calls=calls)
+
+    monkeypatch.setattr(provider, "httpx_client", fake_client)
+
+    result = await provider.list_repository_codespaces("octo", "proj", page=2)
+
+    assert result == payload
+    assert calls[0]["path"] == "/repos/octo/proj/codespaces"
+    assert calls[0]["params"] == {"page": 2}
+
+
+@pytest.mark.asyncio
 async def test_get_authenticated_user(
     monkeypatch: pytest.MonkeyPatch,
     settings: GithubSettings,
@@ -276,6 +327,71 @@ async def test_create_or_update_file_encodes_content(
     assert result["content"]["sha"] == "abc123"
     encoded = calls[0]["json"]["content"]
     assert base64.b64decode(encoded).decode() == "hello world"
+
+
+@pytest.mark.asyncio
+async def test_create_codespace(
+    monkeypatch: pytest.MonkeyPatch, settings: GithubSettings
+) -> None:
+    provider = GithubProvider(settings=settings)
+    responses = {
+        (
+            "POST",
+            "/repos/octo/proj/codespaces",
+            (),
+        ): StubResponse({"name": "my-space"}),
+    }
+    calls: list[dict] = []
+
+    def fake_client(**_):
+        return StubAsyncClient(responses=responses, calls=calls)
+
+    monkeypatch.setattr(provider, "httpx_client", fake_client)
+
+    result = await provider.create_codespace(
+        "octo",
+        "proj",
+        ref="main",
+        machine="standardLinux32gb",
+    )
+
+    assert result["name"] == "my-space"
+    assert calls[0]["json"] == {"ref": "main", "machine": "standardLinux32gb"}
+
+
+@pytest.mark.asyncio
+async def test_codespace_lifecycle_actions(
+    monkeypatch: pytest.MonkeyPatch,
+    settings: GithubSettings,
+) -> None:
+    provider = GithubProvider(settings=settings)
+    responses = {
+        ("GET", "/user/codespaces/my-space", ()): StubResponse({"name": "my-space"}),
+        ("POST", "/user/codespaces/my-space/start", ()): StubResponse(
+            {"state": "Starting"}
+        ),
+        ("POST", "/user/codespaces/my-space/stop", ()): StubResponse(
+            {"state": "Stopped"}
+        ),
+        ("DELETE", "/user/codespaces/my-space", ()): StubResponse(status_code=202),
+    }
+    calls: list[dict] = []
+
+    def fake_client(**_):
+        return StubAsyncClient(responses=responses, calls=calls)
+
+    monkeypatch.setattr(provider, "httpx_client", fake_client)
+
+    details = await provider.get_codespace("my-space")
+    started = await provider.start_codespace("my-space")
+    stopped = await provider.stop_codespace("my-space")
+    deleted = await provider.delete_codespace("my-space")
+
+    assert details["name"] == "my-space"
+    assert started["state"] == "Starting"
+    assert stopped["state"] == "Stopped"
+    assert deleted is None
+    assert [call["method"] for call in calls] == ["GET", "POST", "POST", "DELETE"]
 
 
 @pytest.mark.asyncio
@@ -396,7 +512,7 @@ async def test_check_org_membership_handles_missing(
 @pytest.mark.asyncio
 async def test_container_end_to_end(monkeypatch: pytest.MonkeyPatch) -> None:
     settings = GithubSettings(token="token-xyz", user_agent="sdk")
-    container = Container(github=settings)
+    container = Integrations(github=settings)
 
     responses = {
         ("GET", "/user", ()): StubResponse({"login": "octocat"}),
