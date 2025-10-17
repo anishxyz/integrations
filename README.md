@@ -1,21 +1,55 @@
 # Integrations SDK
 > **Provider catalog:** 10 providers, 204 actions — see [CATALOG.md](CATALOG.md).
 
-- Lightweight Python toolkit for container-managed provider integrations.
-- Providers declare Pydantic settings and async actions; the container wires them together.
-- Built for flexible auth flows: app-level credentials at startup, user tokens per request, and combinations of both.
+**Docs:** https://anishxyz.github.io/integrations/
+
+Lean batteries-included integrations built to accelerate agent development.
 
 ## Highlights
-- **Integrations-first wiring**: Instantiate providers by passing settings or typed `ProviderKey` entries; reach them at `integrations.github` without manual plumbing.
-- **Environment-ready configuration**: Settings inherit from `BaseSettings`, so env vars and aliases load automatically.
-- **Action-based interface**: Implement async `BaseAction` classes and attach them with `action()` for a consistent surface.
-- **Scoped overrides**: Swap tokens or entire configs with `integrations.overrides(...)`, choosing whether to merge or replace defaults.
+- Providers auto-configure from env vars and expose common async actions.
+- A shared `Integrations` container keeps lookup, scope, and overrides simple.
+- Optional auth subsystem wires auth flows (like OAuth2) to provider settings.
+- Async first!
 
-## Installation
-Install directly from GitHub while the package is being prepared for PyPI:
+### Install
 
 ```bash
 uv add "integrations @ git+https://github.com/anishxyz/integrations"
+```
+
+### Configure
+
+Set provider env vars or pass settings into the container:
+
+```bash
+export GITHUB_TOKEN=ghp_example_token
+```
+
+### First Call
+
+```python
+import asyncio
+from integrations import Integrations
+
+
+async def main() -> None:
+    integrations = Integrations()
+    repo = await integrations.github.find_repository(
+        owner="octocat",
+        name="Hello-World",
+    )
+    print(repo["full_name"])
+
+
+asyncio.run(main())
+```
+
+This works because `GithubSettings.token` reads `GITHUB_TOKEN`. Pass explicit overrides when you need something custom:
+
+```python
+integrations = Integrations(
+    github={"token": "...", "user_agent": "integrations-demo"},
+)
 ```
 
 ## Quick Start
@@ -67,6 +101,32 @@ async def list_with_fresh_settings(integrations):
     async with integrations.overrides(github={"token": "override"}, merge=False):
         return await integrations.github.get_authenticated_user()
 ```
+
+## Auth Manager
+
+`AuthManager` wires auth providers, credential stores, and sessions so you can hydrate a container with user-scoped credentials.
+
+```python
+from integrations.auth import AuthManager
+
+
+auth = AuthManager()
+flow = auth.github.oauth2
+
+step = await flow.authorize(state="run-123")
+# redirect user to step["authorization_url"]
+token = await flow.exchange(code="oauth-code", subject="user-123")
+await auth.store_credentials("github", "user-123", token)
+
+async with auth.session(subject="user-123") as integrations:
+    issue = await integrations.github.find_or_create_issue(
+        owner="octocat",
+        repo="hello-world",
+        title="Docs shipped",
+    )
+```
+
+The manager auto-registers first-party auth providers, persists credentials via a pluggable store, and merges binding output with session overrides before yielding an `Integrations` container.
 
 ## Register a Custom Provider
 ```python
